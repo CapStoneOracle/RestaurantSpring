@@ -20,6 +20,5 @@ public interface RestaurantRepository extends JpaRepository<Restaurant_info, Int
     List<Restaurant_info> find(@Param("latitude") BigDecimal latitude, @Param("longitude") BigDecimal longitude);
 
 
-    @Query(value = "select r from Restaurant_info r where r.latitude <= :latitude")
-    List<Restaurant_info> findByLatitude(@Param("latitude") BigDecimal latitude);
+    List<Restaurant_info> findByNameContaining(String keyword);
 }

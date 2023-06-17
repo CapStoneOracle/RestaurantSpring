@@ -24,9 +24,10 @@ public class RestaurantController {
         return ResponseEntity.ok(restaurantService.find(latitude, longitude));
     }
 
-    @GetMapping("/po")
-    public ResponseEntity<List<Restaurant_info>> ge(@RequestParam("latitude") String latitude) {
+    @GetMapping("/search")
+    public ResponseEntity<List<Restaurant_info>> search(@RequestParam("keyword") String keyword) {
 
-        return ResponseEntity.ok(restaurantService.findAll(latitude));
+        return ResponseEntity.ok(restaurantService.findAll(keyword));
     }
+
 }

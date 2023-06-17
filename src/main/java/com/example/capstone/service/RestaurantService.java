@@ -26,10 +26,7 @@ public class RestaurantService {
     }
 
     @Transactional(readOnly = true)
-    public List<Restaurant_info> findAll(String latitude) {
-
-        BigDecimal decimalLat = new BigDecimal(latitude);
-
-        return restaurantRepository.findByLatitude(decimalLat);
+    public List<Restaurant_info> findAll(String keyword) {
+        return restaurantRepository.findByNameContaining(keyword);
     }
 }

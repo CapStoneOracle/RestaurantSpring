@@ -30,5 +30,10 @@ public class Restaurant_info {
 
     private BigDecimal longitude;
 
+    @Lob
+    private String naverreview;
+
+    private String naverstar;
+
 
 }
