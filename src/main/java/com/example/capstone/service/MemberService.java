@@ -70,6 +70,23 @@ public class MemberService {
         }
     }
 
+    public Boolean checkMemberId(String memberId) {
+        if (memberRepository.findByMemberId(memberId).size() == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public Boolean checkMemberName(String memberName) {
+        if (memberRepository.findByMemberName(memberName).size() == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
     public MemberDTO updateForm(String myEmail) {
         Optional<MemberEntity> optionalMemberEntity = memberRepository.findByMemberEmail(myEmail);
         if (optionalMemberEntity.isPresent()) {

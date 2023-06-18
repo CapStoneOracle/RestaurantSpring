@@ -4,7 +4,6 @@ import com.example.capstone.dto.MemberDTO;
 import com.example.capstone.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,13 +16,7 @@ public class MemberController {
     // 생성자 주입
     private final MemberService memberService;
 
-
-//    // 회원가입 페이지 출력 요청
-//    @GetMapping("/member/save")
-//    public String saveForm() {
-//        return "save";
-//    }
-
+    // 회원가입
     @PostMapping("/member/save")
     public ResponseEntity<MemberDTO> save(@RequestBody MemberDTO memberDTO) {
         System.out.println("MemberController.save");
@@ -31,11 +24,6 @@ public class MemberController {
         memberService.save(memberDTO);
         return ResponseEntity.ok(memberDTO);
     }
-
-//    @GetMapping("/member/login")
-//    public String loginForm() {
-//        return "login";
-//    }
 
     @PostMapping("/member/login")
     public String login(@RequestBody MemberDTO memberDTO, HttpSession session) {
@@ -58,12 +46,25 @@ public class MemberController {
         return "list";
     }
 
-    @GetMapping("/member/{id}")
-    public String findById(@PathVariable Long id, Model model) {
-        MemberDTO memberDTO = memberService.findById(id);
-        model.addAttribute("member", memberDTO);
-        return "detail";
+//    @GetMapping("/member/{id}")
+//    public String findById(@PathVariable Long id, Model model) {
+//        MemberDTO memberDTO = memberService.findById(id);
+//        model.addAttribute("member", memberDTO);
+//        return "detail";
+//    }
+
+    // ID 중복확인
+    @GetMapping("/check/id")
+    public ResponseEntity<Boolean> checkMemberId(@RequestParam("id") String memberId) {
+        return ResponseEntity.ok(memberService.checkMemberId(memberId));
     }
+
+    // 닉네임 중복확인
+    @GetMapping("/check/name")
+    public ResponseEntity<Boolean> checkMemberName(@RequestParam("name") String memberName) {
+        return ResponseEntity.ok(memberService.checkMemberName(memberName));
+    }
+
 
     @GetMapping("/member/update")
     public String updateForm(HttpSession session, Model model) {

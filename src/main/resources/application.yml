@@ -15,12 +15,11 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: ghkddlscks19@gmail.com
-    password: acevvwsgsxbxjqaq
-    default-encoding: UTF-8
+    password: znqcepcdrmylhxdy
     properties:
       mail:
         smtp:
-          timeout: 5000
           auth: true
+          timeout: 5000
           starttls:
             enable: true
