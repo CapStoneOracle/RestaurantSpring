@@ -6,6 +6,7 @@ import com.example.capstone.entity.MemberEntity;
 import com.example.capstone.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
+
+    // 회원가입
+    @Transactional
     public void save(MemberDTO memberDTO) {
         // 1. dto =-> entity 변환
         // 2. repository의 save 메소드 호출
@@ -23,53 +27,8 @@ public class MemberService {
         // repository의 save메서드 호출 (조건. entity객체를 넘겨줘야 함)
     }
 
-    public MemberDTO login(MemberDTO memberDTO) {
-        /*
-            1. 회원이 입력한 이메일로 DB에서 조회.
-            2. DB에서 조회한 비밀번호와 사용자가 입력한 비밀번호가 일치하는지 판단.
-         */
-        Optional<MemberEntity> byMemberEmail = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
-        if (byMemberEmail.isPresent()) {
-             // 조회 결과가 있다. (해당 이메일을 가진 회원 정보가 있다.)
-            MemberEntity memberEntity = byMemberEmail.get();
-            if(memberEntity.getMemberPassword().equals(memberDTO.getMemberPassword())) {
-                // 비밀번호 일치
-                // entity -> dto 변환 후 확인
-                MemberDTO dto = MemberDTO.toMemberDTO(memberEntity);
-                return dto;
-            } else  {
-                // 비밀번호 불일치(로그인 실패)
-                return null;
-            }
-        } else  {
-            // 조회 결과가 없다. (해당 이메일을 가진 회원이 없다.)
-            return null;
-        }
-    }
-
-    public List<MemberDTO> findAll() {
-        List<MemberEntity> memberEntityList = memberRepository.findAll();
-        List<MemberDTO> memberDTOList = new ArrayList<>();
-        for (MemberEntity memberEntity: memberEntityList) {
-            memberDTOList.add(MemberDTO.toMemberDTO(memberEntity));
-//            MemberDTO memberDTO = MemberDTO.toMemberDTO(memberEntity);
-//            memberDTOList.add(memberDTO);
-        }
-        return memberDTOList;
-    }
-
-    public MemberDTO findById(Long id) {
-        Optional<MemberEntity> optionalMemberEntity = memberRepository.findById(id);
-        if(optionalMemberEntity.isPresent()) {
-//            MemberEntity memberEntity = optionalMemberEntity.get();
-//           MemberDTO memberDTO - MemberDTO.toMemberDTO(memberEntity);
-//            return memberDTO;
-            return MemberDTO.toMemberDTO(optionalMemberEntity.get());
-        } else {
-            return null;
-        }
-    }
-
+    // 아이디 중복확인
+    @Transactional(readOnly = true)
     public Boolean checkMemberId(String memberId) {
         if (memberRepository.findByMemberId(memberId).size() == 0) {
             return true;
@@ -78,6 +37,8 @@ public class MemberService {
         }
     }
 
+    // 별명 중복확인
+    @Transactional(readOnly = true)
     public Boolean checkMemberName(String memberName) {
         if (memberRepository.findByMemberName(memberName).size() == 0) {
             return true;
@@ -86,33 +47,61 @@ public class MemberService {
         }
     }
 
+    // 회원 탈퇴
+    @Transactional
+    public void deleteByMemberId(String memberId){
+        memberRepository.deleteByMemberId(memberId);
+    }
 
-    public MemberDTO updateForm(String myEmail) {
-        Optional<MemberEntity> optionalMemberEntity = memberRepository.findByMemberEmail(myEmail);
-        if (optionalMemberEntity.isPresent()) {
-            return MemberDTO.toMemberDTO(optionalMemberEntity.get());
+    // 로그인 정보 확인 후 로그인
+    @Transactional(readOnly = true)
+    public Boolean checkLogin(String memberId, String memberPassword) {
+        if (memberRepository.findByMemberIdAndMemberPassword(memberId, memberPassword).size() != 0) {
+            return true;
         } else {
-            return null;
+            return false;
         }
     }
 
-    public void update(MemberDTO memberDTO) {
-        memberRepository.save(MemberEntity.toUpdateMemberEntity(memberDTO));
-
+    // 닉네임 수정
+    @Transactional
+    public void changeMemberName(String memberId, String memberName){
+        List<MemberEntity> member = memberRepository.findByMemberId(memberId);
+        member.get(0).setMemberName(memberName);
+        memberRepository.save(member.get(0));
     }
 
-    public void deleteById(Long id) {
-        memberRepository.deleteById(id);
+    // 이메일 수정
+    @Transactional
+    public void changeMemberEmail(String memberId, String memberEmail){
+        List<MemberEntity> member = memberRepository.findByMemberId(memberId);
+        member.get(0).setMemberEmail(memberEmail);
+        memberRepository.save(member.get(0));
     }
 
-    public String emailCheck(String memberEmail) {
-        Optional<MemberEntity> byMemberEmail = memberRepository.findByMemberEmail(memberEmail);
-        if (byMemberEmail.isPresent()) {
-            // 조회결과가 있다. -> 기존에 누군가 사용중이다.
-            return null;
-        } else {
-            //  조회결과가 없다. -> 사용 가능하다.
-            return "ok";
-        }
+    // 비밀번호 수정
+    @Transactional
+    public void changeMemberPassword(String memberId, String memberPassword){
+        List<MemberEntity> member = memberRepository.findByMemberId(memberId);
+        member.get(0).setMemberPassword(memberPassword);
+        memberRepository.save(member.get(0));
+    }
+
+    // 멤버 Id로 해당 멤버 찾기
+    @Transactional(readOnly = true)
+    public List<MemberEntity> findById(String memberId){
+        return memberRepository.findByMemberId(memberId);
+    }
+
+    // 멤버 email로 아이디 찾기
+    @Transactional(readOnly = true)
+    public MemberEntity findByMemberEmail(String memberEmail) {
+        return memberRepository.findByMemberEmail(memberEmail);
+    }
+
+    // 비밀번호 찾기에서 멤버 ID와 멤버 email로 찾기
+    @Transactional(readOnly = true)
+    public MemberEntity findByMemberIdAndMemberEmail(String memberId, String memberEmail){
+        return memberRepository.findByMemberIdAndMemberEmail(memberId, memberEmail);
     }
 }

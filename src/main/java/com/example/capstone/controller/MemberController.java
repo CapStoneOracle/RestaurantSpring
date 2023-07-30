@@ -1,6 +1,7 @@
 package com.example.capstone.controller;
 
 import com.example.capstone.dto.MemberDTO;
+import com.example.capstone.entity.MemberEntity;
 import com.example.capstone.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,33 +26,12 @@ public class MemberController {
         return ResponseEntity.ok(memberDTO);
     }
 
-    @PostMapping("/member/login")
-    public String login(@RequestBody MemberDTO memberDTO, HttpSession session) {
-        MemberDTO loginResult = memberService.login(memberDTO);
-        if (loginResult != null) {
-            // login 성공
-            session.setAttribute("loginEmail", loginResult.getMemberEmail());
-            return "main";
-        } else {
-            // login 실패
-            return "login";
-        }
+    // 로그인 정보 맞는지 확인
+    @PostMapping("/login")
+    public Boolean checkLogin(@RequestParam("id") String memberId, @RequestParam("password")String memberPassword) {
+        System.out.println("checkLogin() 입장");
+        return memberService.checkLogin(memberId, memberPassword);
     }
-
-    @GetMapping("/member/all")     //회원정보 가져오기.
-    public String findAll(Model model) {
-        List<MemberDTO> memberDTOList = memberService.findAll();
-        // 어떠한 html로 가져갈 데이터가 있다면 위의 model을 사용한다.
-        model.addAttribute("memberList", memberDTOList);
-        return "list";
-    }
-
-//    @GetMapping("/member/{id}")
-//    public String findById(@PathVariable Long id, Model model) {
-//        MemberDTO memberDTO = memberService.findById(id);
-//        model.addAttribute("member", memberDTO);
-//        return "detail";
-//    }
 
     // ID 중복확인
     @GetMapping("/check/id")
@@ -65,42 +45,45 @@ public class MemberController {
         return ResponseEntity.ok(memberService.checkMemberName(memberName));
     }
 
-
-    @GetMapping("/member/update")
-    public String updateForm(HttpSession session, Model model) {
-        String myEmail = (String) session.getAttribute("loginEmail");
-        MemberDTO memberDTO = memberService.updateForm(myEmail);
-        model.addAttribute("updateMember", memberDTO);
-        return "update";
+    // 회원 탈퇴
+    @DeleteMapping("/delete")
+    public void deleteByName(@RequestParam("id") String memberId){
+        memberService.deleteByMemberId(memberId);
     }
 
-    @PostMapping("/member/update")
-    public String update(@ModelAttribute MemberDTO memberDTO) {
-        memberService.update(memberDTO);
-        return "redirect:/member/" + memberDTO.getId();
+    // 닉네임 수정
+    @PutMapping("/change/name")
+    public void changeMemberName(@RequestParam("id") String memberId, @RequestParam("name") String memberName){
+        memberService.changeMemberName(memberId, memberName);
     }
 
-    @GetMapping("/member/delete/{id}")
-    public String deleteById(@PathVariable Long id) {
-        memberService.deleteById(id);
-        return "redirect:/member/";
+    // 이메일 수정
+    @PutMapping("/change/email")
+    public void changeMemberEmail(@RequestParam("id") String memberId, @RequestParam("email") String memberEmail){
+        memberService.changeMemberEmail(memberId, memberEmail);
     }
 
-    @GetMapping("/member/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "index";
+    // 비밀번호 수정
+    @PutMapping("/change/password")
+    public void changeMemberPassword(@RequestParam("id") String memberId, @RequestParam("password") String memberPassword){
+        memberService.changeMemberPassword(memberId, memberPassword);
     }
 
-    @PostMapping("/member/email-check")
-    public @ResponseBody String emailCheck(@RequestParam("memberEmail") String memberEmail) {
-        System.out.println("memberEmail = " + memberEmail);
-        String checkResult = memberService.emailCheck(memberEmail);
-        if (checkResult != null) {
-            return "ok";
-        } else {
-            return "no";
-        }
+    // 해당 멤버 ID의 정보 가져오기
+    @GetMapping("/find/id")
+    public ResponseEntity<List<MemberEntity>> findById(@RequestParam("id") String memberId){
+        return ResponseEntity.ok(memberService.findById(memberId));
+    }
 
+    // 아이디 찾기 할 때 이메일을 통해 찾는다.
+    @GetMapping("find/email")
+    public ResponseEntity<MemberEntity> findBymemberEmail(@RequestParam("email") String memberEmail){
+        return ResponseEntity.ok(memberService.findByMemberEmail(memberEmail));
+    }
+
+    // 비밀번호 찾기 할 때 멤버ID, 이메일로 찾기
+    @GetMapping("find/password")
+    public ResponseEntity<MemberEntity> findByMemberIdAndMemberEmail(@RequestParam("id") String memberId, @RequestParam("email") String memberEmail) {
+        return ResponseEntity.ok(memberService.findByMemberIdAndMemberEmail(memberId, memberEmail));
     }
 }

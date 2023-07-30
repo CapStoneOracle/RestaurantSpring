@@ -18,7 +18,7 @@ public class Restaurant_info {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private String adress;
+    private String address;
 
     private String name;
 
@@ -34,6 +34,16 @@ public class Restaurant_info {
     private String naverreview;
 
     private String naverstar;
+
+    @Lob
+    private String googlereview;
+
+    private String googlestar;
+
+    @Lob
+    private String mangoreview;
+
+    private String mangostar;
 
 
 }

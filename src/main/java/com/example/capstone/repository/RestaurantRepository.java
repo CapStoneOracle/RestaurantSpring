@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 
 public interface RestaurantRepository extends JpaRepository<Restaurant_info, Integer> {
@@ -21,4 +22,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant_info, Int
 
 
     List<Restaurant_info> findByNameContaining(String keyword);
+
+    Optional<Restaurant_info> findById(int id);
+
 }
